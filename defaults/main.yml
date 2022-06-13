@@ -1,0 +1,19 @@
+---
+# defaults file for percona-deb
+patroni_download_url: "https://github.com/zalando/patroni/archive/refs/tags/v{{ patroni_version }}.tar.gz"
+patroni_version: "2.1.4"
+patroni_system_user: "patroni"
+patroni_system_group: "patroni"
+patroni_bin_dir: "/opt/patroni"
+patroni_data_dir: "/opt/postgresql/data"
+patroni_log_dir: "/opt/postgresql/log"
+patroni_socket_dir: "/opt/postgresql/socket"
+patroni_configuration_dir: "/opt/postgresql/configuration"
+patroni_configuration_template: "patroni.yml.j2"
+
+postgresql_service: "postgresql"
+
+#####CONFIGURATION_FILE#####
+patroni_etcd_scope: "batman"
+patroni_etcd_namespace: "/patroni/"
+

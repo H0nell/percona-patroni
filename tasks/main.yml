@@ -1,0 +1,102 @@
+---
+# tasks file for percona-deb
+- name: Ensure that python3 installed
+  become: True
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: True
+  loop:
+    - python3
+    - python3-pip
+
+- name: Install psycopg-binary 
+  become: True
+  pip:
+    name: psycopg2-binary
+
+- name: Create patroni system group
+  become: True
+  group:
+    name: "{{ patroni_system_group }}"
+    state: present
+    system: True
+
+- name: Create patroni system user
+  become: True
+  user:
+    name: "{{ patroni_system_user }}"
+    group: "{{ patroni_system_group }}"
+    system: True
+
+- name: Create directory for patroni's work
+  become: True
+  file:
+    path: "{{ item }}"
+    state: directory
+    recurse: True
+    owner: patroni
+    group: patroni
+    mode: "0700"
+  loop:
+    - "{{ patroni_data_dir }}"
+    - "{{ patroni_socket_dir }}"
+    - "{{ patroni_log_dir }}"
+    - "{{ patroni_configuration_dir }}"
+
+- name: Download and unarchive patroni release
+  become: True
+  unarchive:
+    remote_src: True
+    src: "https://github.com/zalando/patroni/archive/refs/tags/v{{ patroni_version }}.tar.gz"
+    dest: "/opt"
+    owner: "{{ patroni_system_user }}"
+    group: "{{ patroni_system_group }}"
+
+- name: Create simlink for patroni
+  become: True
+  file:
+    src: "/opt/patroni-{{ patroni_version }}"
+    dest: "{{ patroni_bin_dir }}"
+    owner: "{{ patroni_system_user }}"
+    group: "{{ patroni_system_group }}"
+    state: link
+    force: True
+
+- name: Install requirements by pip
+  become: True
+  pip:
+    requirements: "{{ patroni_bin_dir }}/requirements.txt"
+
+- name: template configuration file
+  become: True
+  template:
+    src: "{{ patroni_configuration_template }}"
+    dest: "{{ patroni_configuration_dir }}/{{ configuration_name }}.yml"
+    owner: "{{ patroni_system_user }}"
+    group: "{{ patroni_system_group }}"
+
+- name: Create patroni unit file
+  become: True
+  template:
+    src: patroni.service.j2
+    dest: /etc/systemd/system/patroni.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: stop postgresql service if running
+  become: True
+  service:
+    name: "{{ postgresql_service }}"
+    state: stopped
+    enabled: False
+  ignore_errors: true
+
+- name: Start end enable service
+  become: True
+  service:
+    name: patroni
+    state: started
+    enabled: True
+
