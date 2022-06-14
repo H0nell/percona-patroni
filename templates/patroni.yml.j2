@@ -3,8 +3,8 @@ namespace: {{ patroni_etcd_namespace }}
 name: {{ configuration_name }}
 
 restapi:
-  listen: {{ ansible_host }}:8008
-  connect_address: {{ ansible_host }}:8008
+  listen: {{ patroni_restapi_listen }}
+  connect_address: {{ patroni_restapi_connect_address }}
 #  certfile: /etc/ssl/certs/ssl-cert-snakeoil.pem
 #  keyfile: /etc/ssl/private/ssl-cert-snakeoil.key
 #  authentication:
@@ -19,7 +19,7 @@ restapi:
 etcd:
   hosts:
 {% for node in groups ['etcd'] %}
-  - {{ hostvars[node].ansible_host }}:2379
+  - {{ hostvars[node].ansible_host }}:{{ patroni_etcd_port }}
 {% endfor %} 
   #Once discovery is complete Patroni will use the list of advertised clientURLs
   #It is possible to change this behavior through by setting:
@@ -81,7 +81,6 @@ bootstrap:
 {% endfor %}
   - host replication replicator 127.0.0.1/32 md5
   - host all all 0.0.0.0/0 md5
-#  - hostssl all all 0.0.0.0/0 md5
 
   # Additional script to be launched after initial cluster creation (will be passed the connection URL as parameter)
 # post_init: /usr/local/bin/setup_cluster.sh
@@ -95,10 +94,10 @@ bootstrap:
         - createdb
 
 postgresql:
-  listen: {{ ansible_host }}:5432
-  connect_address: {{ ansible_host }}:5432
+  listen: {{ patroni_postgresql_listen }}
+  connect_address: {{ patroni_postgresql_connect_address }}
   data_dir: {{ patroni_data_dir }}
-  bin_dir: /usr/lib/postgresql/14/bin/
+  bin_dir: {{ patroni_postgresql_bin_dir }}
 #  config_dir:
   pgpass: /tmp/pgpass0
   authentication:

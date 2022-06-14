@@ -17,3 +17,12 @@ postgresql_service: "postgresql"
 patroni_etcd_scope: "batman"
 patroni_etcd_namespace: "/patroni/"
 
+patroni_restapi_host: "{{ ansible_host }}
+patroni_restapi_port: "8008"
+patroni_restapi_listen: "{{ patroni_restapi_host }}:{{ patroni_restapi_port }}"
+patroni_restapi_connect_address: "{{ patroni_restapi_host }}:{{ patroni_restapi_port }}"
+patroni_postgresql_host: {{ ansible_host }}
+patroni_postgresql_port: "5432"
+patroni_postgresql_listen: "{{ patroni_postgresql_host }}:{{ patroni_postgresql_port }}"
+patroni_postgresql_connect_address: "{{ patroni_postgresql_host }}:{{ patroni_postgresql_port }}"
+
